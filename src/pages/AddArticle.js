@@ -33,6 +33,11 @@ function AddArticle(props) {
 
     useEffect(()=>{
         getTypeInfo()
+        let tmpId = props.match.params.id
+        if(tmpId){
+            setArticleId(tmpId)
+            getArticleById(tmpId)
+        }
     },[]) //数组空代表只执行一次
 
     const changeContent = (e) =>{
@@ -129,6 +134,25 @@ function AddArticle(props) {
 
 
     }
+
+    const getArticleById=(id)=>{
+        axios(servicePath.getArticleById+id,{ 
+            withCredentials: true,
+            header:{ 'Access-Control-Allow-Origin':'*' }
+        }).then(res=>{
+            setArticleTitle(res.data.data[0].title)
+            setArticleContent(res.data.data[0].article_content)
+            let html = marked(res.data.data[0].article_content)
+            setMarkdownContent(html)
+            setIntroducemd(res.data.data[0].introduce)
+            let tmpInt=marked(res.data.data[0].introduce)
+            setIntroducehtml(tmpInt)
+            setShowDate(res.data.data[0].addTime)
+            setSelectType(res.data.data[0].typeId)
+
+        })
+    
+    }
     
     return(
         <div>
@@ -155,7 +179,7 @@ function AddArticle(props) {
                     </Row>
                     <br/><br/>
                     <Row gutter={10}>
-                        <Col span={12}><TextArea className='markdown-content' rows={35} placeholder='文章内容' onChange={changeContent} /></Col>
+                        <Col span={12}><TextArea className='markdown-content' rows={35} placeholder='文章内容' value={articleContent} onChange={changeContent} /></Col>
                         <Col span={12}>
                             <div className='show-html' dangerouslySetInnerHTML = {{__html:markdownContent}}></div>
                         </Col>
@@ -164,13 +188,13 @@ function AddArticle(props) {
                 <Col span={6}>
                     <Row>
                         <Col span={24}>
-                            <Button size='large'>暂存文章</Button>&nbsp;
+                            {/* <Button size='large'>暂存文章</Button>&nbsp; */}
                             <Button type='primary' size='large' onClick={saveArticle}>发布文章</Button>
                             <br/>
                         </Col>
                         <Col span={24}>
                             <br/>
-                            <TextArea rows={4} placeholder='文章简介' onChange={changeIntroduce}></TextArea>
+                            <TextArea rows={4} placeholder='文章简介' onChange={changeIntroduce} value={introducemd}></TextArea>
                             <br/>
                             <br/>
                             <div className='introduce-html' dangerouslySetInnerHTML={{__html:introducehtml}}></div>
